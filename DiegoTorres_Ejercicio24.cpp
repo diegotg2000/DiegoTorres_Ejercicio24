@@ -67,13 +67,7 @@ float *read_file(string filename, int *n_points){
 }
 
 float logprior(float *c, int poly_degree){
-    float respuesta=0;
-    for(int i;i<(poly_degree+1);i++){
-        if(c[i]>50 || c[i]<-50){
-            respuesta=-inf;
-        }
-    }
-    return respuesta;
+    return 0;
 }
 float *model(float*x, int n_points, float *c, int poly_degree){
         float *result=NULL;
@@ -94,33 +88,31 @@ float loglikelihood(float *x_obs, float *y_obs, int n_points, float *c, int poly
     float suma;
     mis_yes=model(x_obs,n_points,c,poly_degree);
     for(int i=0;i<n_points;i++){
-        suma+=-(mis_yes[i]-y_obs[i])*(mis_yes[i]-y_obs[i]);        
+        suma+=(mis_yes[i]-y_obs[i])*(mis_yes[i]-y_obs[i])/0.0001;        
     }
-    return suma;
+    return -0.5*suma;
 }
 void MCMC_polynomial(float *x_obs, float *y_obs, int n_points, int n_steps, int poly_degree){
-    float *c=NULL;
-    float *s=NULL;
     float antes,despues;
-    c=new float[poly_degree+1];
-    s=new float[poly_degree+1];
-    for(int i=0;i<(poly_degree+1);i++){
-        c[i]=0;
+    float *c=new float[poly_degree+1];
+
+    for(int m=0;m<(poly_degree+1);m++){
+        c[m]=0;
     }
     for(int i=0;i<n_steps;i++){
+        float *s=new float[poly_degree+1];
         for(int j=0;j<(poly_degree+1);j++){
             s[j]=c[j]+0.2*drand48()-0.1;
         }
-        antes=loglikelihood(x_obs,y_obs,n_points, c,poly_degree)+logprior(c,poly_degree);
-        despues=loglikelihood(x_obs,y_obs,n_points, s,poly_degree)+logprior(s,poly_degree);
+        antes=loglikelihood(x_obs,y_obs,n_points, c,poly_degree);
+        despues=loglikelihood(x_obs,y_obs,n_points, s,poly_degree);
         float gamma=exp(despues-antes);
         float r=drand48();
         if(gamma>r){
-            c=s;
+        for(int k=0;k<(poly_degree+1);k++){
+            c[k]=s[k];
         }
-    }
-   for(int k=0;k<(poly_degree+1);k++){
-       cout<<c[k]<<endl;
-   } 
-  
+        }
+        cout<<c[0]<<' '<<c[1]<<' '<<c[2]<<' '<<c[3]<<endl;
+    }  
 }

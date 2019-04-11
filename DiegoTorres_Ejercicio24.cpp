@@ -88,7 +88,7 @@ float loglikelihood(float *x_obs, float *y_obs, int n_points, float *c, int poly
     float suma;
     mis_yes=model(x_obs,n_points,c,poly_degree);
     for(int i=0;i<n_points;i++){
-        suma+=(mis_yes[i]-y_obs[i])*(mis_yes[i]-y_obs[i])/0.0001;        
+        suma+=(mis_yes[i]-y_obs[i])*(mis_yes[i]-y_obs[i]);        
     }
     return -0.5*suma;
 }
@@ -102,11 +102,11 @@ void MCMC_polynomial(float *x_obs, float *y_obs, int n_points, int n_steps, int 
     for(int i=0;i<n_steps;i++){
         float *s=new float[poly_degree+1];
         for(int j=0;j<(poly_degree+1);j++){
-            s[j]=c[j]+0.2*drand48()-0.1;
+            s[j]=c[j]+2*drand48()-1;
         }
         antes=loglikelihood(x_obs,y_obs,n_points, c,poly_degree);
         despues=loglikelihood(x_obs,y_obs,n_points, s,poly_degree);
-        float gamma=exp(despues-antes);
+        float gamma=exp(despues)/exp(antes);
         float r=drand48();
         if(gamma>r){
         for(int k=0;k<(poly_degree+1);k++){
